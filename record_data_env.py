@@ -159,8 +159,6 @@ class RecordDataEnv:
         _ = ax.set_xticklabels([])
         _ = ax.set_yticklabels([])
 
-        plt.show()
-
         plt.savefig(
             "imgs/miniworld_record.png",
             dpi=200,
