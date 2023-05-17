@@ -1,11 +1,5 @@
-#!/usr/bin/env python3
-
-"""
-This script allows you to manually control the simulator
-using the keyboard arrows.
-"""
-
 import argparse
+import pickle
 
 import gymnasium as gym
 
@@ -15,7 +9,7 @@ from record_data_env import RecordDataEnv
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env-name", default="MiniWorld-Hallway-v0")
+    parser.add_argument("--env-name", default="MiniWorld-FourRooms-v0")
     parser.add_argument(
         "--domain-rand", action="store_true", help="enable domain randomization"
     )
@@ -36,8 +30,13 @@ def main():
 
     print(f"Miniworld v{miniworld_version}, Env: {args.env_name}")
 
+    with open(
+        "/Users/bolundai/Documents/MinigridRecordData/data/key_map.pickle", "rb"
+    ) as file:
+        key_map = pickle.load(file)
+
     record_data = RecordDataEnv(
-        env, args.no_time_limit, args.domain_rand, args.filename
+        env, args.no_time_limit, args.domain_rand, args.filename, key_map
     )
     record_data.run()
 

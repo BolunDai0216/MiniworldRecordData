@@ -8,8 +8,24 @@ import pyglet
 from pyglet.window import key
 
 
+def map_number_to_key(number):
+    key_mapping = {
+        0: key._0,
+        1: key._1,
+        2: key._2,
+        3: key._3,
+        4: key._4,
+        5: key._5,
+        6: key._6,
+        7: key._7,
+        8: key._8,
+        9: key._9,
+    }
+    return key_mapping.get(number, None)
+
+
 class RecordDataEnv:
-    def __init__(self, env, no_time_limit, domain_rand, save_data_filename):
+    def __init__(self, env, no_time_limit, domain_rand, save_data_filename, key_map):
         self.env = env
 
         if no_time_limit:
@@ -19,6 +35,11 @@ class RecordDataEnv:
 
         self.data = None
         self.filename = save_data_filename
+        _key_map = key_map
+        self.key_map = []
+
+        for k in _key_map:
+            self.key_map.append(map_number_to_key(int(k)))
 
     def run(self):
         print("============")
@@ -50,13 +71,13 @@ class RecordDataEnv:
             if symbol == key.ESCAPE:
                 self.env.close()
 
-            if symbol == key.UP:
+            if symbol == self.key_map[2]:
                 self.step(self.env.actions.move_forward)
             elif symbol == key.DOWN:
                 self.step(self.env.actions.move_back)
-            elif symbol == key.LEFT:
+            elif symbol == self.key_map[0]:
                 self.step(self.env.actions.turn_left)
-            elif symbol == key.RIGHT:
+            elif symbol == self.key_map[1]:
                 self.step(self.env.actions.turn_right)
             elif symbol == key.PAGEUP or symbol == key.P:
                 self.step(self.env.actions.pickup)
@@ -91,7 +112,10 @@ class RecordDataEnv:
     def reset(self):
         if self.data is not None:
             self.data.append(deepcopy(self.episode_data))
+            self.plot_data(self.counter)
+            self.counter += 1
         else:
+            self.counter = 0
             self.data = []
 
         self.env.reset()
@@ -134,24 +158,22 @@ class RecordDataEnv:
         with open(self.filename, "wb") as handle:
             pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        self.plot_data()
-
-    def plot_data(self):
+    def plot_data(self, counter):
         fig, ax = plt.subplots(1, 1)
         ax.imshow(self.env_img)
 
         x_scale, z_scale = self.scale["x_scale"], self.scale["z_scale"]
         x_offset, z_offset = self.scale["x_offset"], self.scale["z_offset"]
 
-        for i, data in enumerate(self.data):
-            _pos = np.array([d["agent_pos"] for d in data if True])
-            ax.plot(
-                x_scale * _pos[:, 0] + x_offset,
-                z_scale * _pos[:, 2] + z_offset,
-                color="darkorange",
-                alpha=(i + 1) / len(self.data),
-                linewidth=3,
-            )
+        # for i, data in enumerate(self.data):
+        _pos = np.array([d["agent_pos"] for d in self.data[-1] if True])
+        ax.plot(
+            x_scale * _pos[:, 0] + x_offset,
+            z_scale * _pos[:, 2] + z_offset,
+            color="darkorange",
+            alpha=1.0,
+            linewidth=3,
+        )
 
         # Turn off x/y axis numbering/ticks
         ax.xaxis.set_ticks_position("none")
@@ -160,7 +182,7 @@ class RecordDataEnv:
         _ = ax.set_yticklabels([])
 
         plt.savefig(
-            "imgs/miniworld_record.png",
+            f"imgs/miniworld_record{counter}.png",
             dpi=200,
             transparent=False,
             bbox_inches="tight",
