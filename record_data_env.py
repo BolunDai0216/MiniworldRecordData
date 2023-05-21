@@ -131,6 +131,11 @@ class RecordDataEnv:
             }
         )
 
+        # get top-down view of the environment
+        self.env_img, self.scale = self.env.render_top_view(
+            self.env.vis_fb, render_agent=False, return_scale=True
+        )
+
     def step(self, action):
         print(
             "step {}/{}: {}".format(
