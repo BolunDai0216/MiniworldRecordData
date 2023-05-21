@@ -1,6 +1,8 @@
 import math
 import pickle
 from copy import deepcopy
+from datetime import datetime
+from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,6 +29,7 @@ def map_number_to_key(number):
 class RecordDataEnv:
     def __init__(self, env, no_time_limit, domain_rand, save_data_filename, key_map):
         self.env = env
+        self.stamp = datetime.fromtimestamp(time()).strftime("%Y%m%d-%H%M%S")
 
         if no_time_limit:
             self.env.max_episode_steps = math.inf
@@ -34,7 +37,7 @@ class RecordDataEnv:
             self.env.domain_rand = True
 
         self.data = None
-        self.filename = save_data_filename
+        self.filename = save_data_filename + f"_{self.stamp}.pickle"
         _key_map = key_map
         self.key_map = []
 
@@ -124,6 +127,7 @@ class RecordDataEnv:
             {
                 "agent_pos": self.env.agent.pos,
                 "agent_dir": self.env.agent.dir,
+                "reward": 0,
             }
         )
 
@@ -142,6 +146,7 @@ class RecordDataEnv:
             {
                 "agent_pos": self.env.agent.pos,
                 "agent_dir": self.env.agent.dir,
+                "reward": reward,
             }
         )
 
@@ -182,7 +187,7 @@ class RecordDataEnv:
         _ = ax.set_yticklabels([])
 
         plt.savefig(
-            f"imgs/miniworld_record{counter}.png",
+            f"imgs/miniworld_record{counter}_{self.stamp}.png",
             dpi=200,
             transparent=False,
             bbox_inches="tight",

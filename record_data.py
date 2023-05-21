@@ -21,7 +21,7 @@ def main():
         action="store_true",
         help="show the top view instead of the agent view",
     )
-    parser.add_argument("--filename", default="data/data.pickle")
+    parser.add_argument("--filename", default="data/data")
     args = parser.parse_args()
     view_mode = "top" if args.top_view else "agent"
 
